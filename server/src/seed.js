@@ -6,9 +6,9 @@ import { CodeChunk } from './models/CodeChunk.js';
 import { chunkerService } from './services/chunkerService.js';
 import { embeddingService } from './services/embeddingService.js';
 
-const seedDatabase = async () => {
+export const seedDatabase = async (isStandalone = true) => {
   try {
-    await connectDB();
+    if (isStandalone) await connectDB();
     console.log('[Seed] Clearing existing demo data...');
     await User.deleteMany({});
     await Repository.deleteMany({});
@@ -165,11 +165,14 @@ export const createOrder = async (req, res) => {
     await repo.save();
 
     console.log(`[Seed] Successfully seeded repository '${repo.name}' with ${totalChunks} vector chunks!`);
-    process.exit(0);
+    if (isStandalone) process.exit(0);
   } catch (err) {
     console.error('[Seed Error]', err);
-    process.exit(1);
+    if (isStandalone) process.exit(1);
   }
 };
 
-seedDatabase();
+if (process.argv[1]?.endsWith('seed.js')) {
+  seedDatabase(true);
+}
+
