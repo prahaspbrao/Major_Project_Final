@@ -212,11 +212,14 @@ export const deleteRepo = async (req, res, next) => {
 // Helper function to scan local directory
 function scanDirectory(dirPath, fileList = [], baseDir = dirPath) {
   const files = fs.readdirSync(dirPath);
+  const ignoredExts = ['.png', '.jpg', '.jpeg', '.gif', '.ico', '.svg', '.woff', '.woff2', '.ttf', '.eot', '.pdf', '.zip', '.tar', '.gz', '.lock', '.exe', '.dll'];
+
   for (const file of files) {
     const fullPath = path.join(dirPath, file);
     const relPath = path.relative(baseDir, fullPath).replace(/\\/g, '/');
+    const ext = path.extname(file).toLowerCase();
 
-    if (file.startsWith('.') || ['node_modules', 'dist', 'build', 'coverage', '.git', '__pycache__'].includes(file)) {
+    if (file.startsWith('.') || ['node_modules', 'dist', 'build', 'coverage', '.git', '__pycache__'].includes(file) || ignoredExts.includes(ext) || file === 'package-lock.json') {
       continue;
     }
 

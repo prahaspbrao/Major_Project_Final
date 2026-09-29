@@ -11,7 +11,13 @@ export const chunkerService = {
     const lines = content.split('\n');
     const totalLines = lines.length;
 
-    // Supported text formats
+    // Exclude non-code assets and binaries
+    const ignoredExts = ['.png', '.jpg', '.jpeg', '.gif', '.ico', '.svg', '.woff', '.woff2', '.ttf', '.eot', '.pdf', '.zip', '.tar', '.gz', '.lock', '.exe', '.dll'];
+    if (ignoredExts.includes(ext) || fileName === 'package-lock.json' || fileName === 'yarn.lock') {
+      return [];
+    }
+
+    // Supported text and code formats
     const codeExts = ['.js', '.jsx', '.ts', '.tsx', '.py', '.java', '.c', '.cpp', '.go', '.rs', '.php', '.html', '.css', '.json', '.md', '.sql'];
     if (!codeExts.includes(ext) && totalLines > 200) {
       return this.slidingWindowChunk(filePath, fileName, lines, ext);
