@@ -1,0 +1,481 @@
+import os
+import subprocess
+
+html_content = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Developer Assistant for Code Repositories - Major Project Report</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm 15mm 20mm 15mm;
+            @bottom-right {
+                content: counter(page);
+            }
+        }
+        body {
+            font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+            color: #1e293b;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+        }
+        .cover-page {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-align: center;
+            page-break-after: always;
+            box-sizing: border-box;
+            padding: 40px 20px;
+        }
+        .cover-header {
+            border-bottom: 3px solid #2563eb;
+            padding-bottom: 15px;
+        }
+        .inst-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e3a8a;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0;
+        }
+        .dept-title {
+            font-size: 14px;
+            color: #475569;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+        .project-title-box {
+            margin: 60px 0;
+            padding: 30px;
+            background: linear-gradient(135deg, #eff6ff 0%, #e0effe 100%);
+            border-radius: 12px;
+            border-left: 6px solid #2563eb;
+        }
+        .project-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: #1e3a8a;
+            margin: 0 0 10px 0;
+        }
+        .project-subtitle {
+            font-size: 14px;
+            color: #3b82f6;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+        .meta-table {
+            width: 100%;
+            margin-top: 40px;
+            border-collapse: collapse;
+        }
+        .meta-table td {
+            padding: 10px;
+            font-size: 13px;
+            vertical-align: top;
+        }
+        .meta-table .label {
+            font-weight: 700;
+            color: #1e293b;
+            width: 40%;
+            text-align: right;
+            padding-right: 15px;
+        }
+        .meta-table .val {
+            color: #334155;
+            text-align: left;
+        }
+        .section {
+            page-break-inside: avoid;
+            margin-bottom: 30px;
+        }
+        h1 {
+            font-size: 20px;
+            color: #1e3a8a;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 6px;
+            margin-top: 30px;
+            page-break-after: avoid;
+        }
+        h2 {
+            font-size: 16px;
+            color: #2563eb;
+            margin-top: 20px;
+            margin-bottom: 8px;
+            page-break-after: avoid;
+        }
+        h3 {
+            font-size: 14px;
+            color: #0f172a;
+            margin-top: 15px;
+            margin-bottom: 6px;
+        }
+        p, li {
+            font-size: 12px;
+            color: #334155;
+            text-align: justify;
+        }
+        ul, ol {
+            padding-left: 20px;
+            margin-top: 5px;
+        }
+        .badge {
+            display: inline-block;
+            background: #dbeafe;
+            color: #1e40af;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-right: 5px;
+        }
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 15px 0;
+        }
+        .tech-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+        }
+        .tech-card-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin-bottom: 4px;
+        }
+        .tech-card-desc {
+            font-size: 11px;
+            color: #64748b;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 11px;
+        }
+        th {
+            background-color: #1e3a8a;
+            color: #ffffff;
+            font-weight: 600;
+            text-align: left;
+            padding: 8px 10px;
+        }
+        td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #334155;
+        }
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        .code-block {
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 10.5px;
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            margin: 12px 0;
+        }
+        .diagram-box {
+            background-color: #f1f5f9;
+            border: 1px dashed #94a3b8;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            font-family: 'Consolas', monospace;
+            font-size: 10px;
+            line-height: 1.4;
+            margin: 15px 0;
+            white-space: pre;
+        }
+        .callout {
+            background-color: #f0fdf4;
+            border-left: 4px solid #16a34a;
+            padding: 10px 14px;
+            border-radius: 4px;
+            margin: 15px 0;
+            font-size: 11.5px;
+        }
+        .callout-title {
+            font-weight: 700;
+            color: #15803d;
+            margin-bottom: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- COVER PAGE -->
+    <div class="cover-page">
+        <div class="cover-header">
+            <div class="inst-title">The National Institute of Engineering</div>
+            <div class="dept-title">(An Autonomous Institution under VTU, Belagavi)</div>
+            <div class="dept-title">DEPARTMENT OF COMPUTER SCIENCE & ENGINEERING</div>
+        </div>
+
+        <div class="project-title-box">
+            <div class="project-subtitle">Final-Year CSE Major Project Report (2026)</div>
+            <h1 class="project-title">AI Developer Assistant for Code Repositories</h1>
+            <div style="font-size: 13px; color: #475569; font-weight: 500;">
+                Retrieval-Augmented Generation (RAG) with MERN Stack, Redis Caching, Nginx Gateway & Docker
+            </div>
+        </div>
+
+        <div>
+            <table class="meta-table">
+                <tr>
+                    <td class="label">Project Batch:</td>
+                    <td class="val">Batch C9</td>
+                </tr>
+                <tr>
+                    <td class="label">Submitted By:</td>
+                    <td class="val">
+                        <strong>PRAHAS P B RAO</strong> (USN: 4NI23CS144)<br>
+                        <strong>P AKHIL DATTA</strong> (USN: 4NI23CS132)
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">Project Guide:</td>
+                    <td class="val">Mrs. Shilpashree S, Assistant Professor</td>
+                </tr>
+                <tr>
+                    <td class="label">Academic Year:</td>
+                    <td class="val">2025 – 2026</td>
+                </tr>
+            </table>
+        </div>
+
+        <div style="font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 10px;">
+            Department of Computer Science & Engineering | NIE Mysore, Karnataka - 570018
+        </div>
+    </div>
+
+    <!-- PAGE 2: EXECUTIVE SUMMARY & OBJECTIVES -->
+    <h1>1. Executive Summary & Problem Statement</h1>
+    <p>
+        Modern software development relies heavily on large-scale code repositories containing thousands of source files, complex class hierarchies, and deeply nested dependencies. Navigating these repositories poses a steep learning curve for developers onboarding onto legacy projects or inspecting unfamiliar components.
+    </p>
+    <p>
+        <strong>Existing Limitations:</strong> Generic AI coding assistants (e.g., standard Copilot or ChatGPT) lack visibility into a project's private, non-public code structure. Conversely, traditional code search tools (such as <code>grep</code> or regex searchers) lack semantic natural-language comprehension and cannot synthesize code explanations, bug localizations, or refactoring recommendations.
+    </p>
+    <p>
+        <strong>Proposed Solution:</strong> The <em>AI Developer Assistant for Code Repositories</em> bridges this gap by combining Large Language Models (LLMs) with <strong>Retrieval-Augmented Generation (RAG)</strong>. The system automatically parses code repositories into semantic blocks (functions, classes, modules), vector-embeds them, stores them in MongoDB, and executes grounded cosine similarity retrieval to answer natural-language developer queries with <strong>exact file paths and line number source citations</strong>.
+    </p>
+
+    <div class="callout">
+        <div class="callout-title">Core Objectives Achieved</div>
+        <ul>
+            <li><strong>Objective 1:</strong> Parse, chunk, and embed source code repositories into a searchable vector index with line-level precision.</li>
+            <li><strong>Objective 2:</strong> Retrieve relevant code snippets and generate grounded answers using LLMs / local RAG vector engines.</li>
+            <li><strong>Objective 3:</strong> Provide a multi-mode chat interface supporting Code Explanation, Bug Localization, and Refactoring Suggestions.</li>
+            <li><strong>Objective 4:</strong> Deploy a production-style architecture incorporating MERN, Redis caching, Nginx reverse proxy, and Docker Compose orchestration.</li>
+        </ul>
+    </div>
+
+    <h1>2. System Architecture & Topology</h1>
+    <p>
+        The application strictly implements a multi-tier, microservice-ready full-stack web architecture. All traffic passes through an Nginx reverse proxy gateway before reaching the client or API backend.
+    </p>
+
+    <div class="diagram-box">
++-----------------------------------------------------------------------------------+
+|                                 USER BROWSER                                      |
++-----------------------------------------------------------------------------------+
+                                          |
+                                    HTTP (Port 80)
+                                          |
+                                          v
++-----------------------------------------------------------------------------------+
+|                             NGINX REVERSE PROXY                                   |
+|                             (API Gateway Port 80)                                 |
++-----------------------------------------------------------------------------------+
+            /                                                   \
+   Static UI /                                                   \ API Proxy (/api/v1/*)
+            v                                                     v
++-----------------------+                               +-----------------------+
+|  REACT 18 FRONTEND    |                               |  EXPRESS.JS BACKEND   |
+|  (Vite + Tailwind)    |                               |  (Node.js REST API)   |
++-----------------------+                               +-----------------------+
+                                                            /       |       \
+                                                           /        |        \
+                                                          v         v         v
+                                                    +----------+ +-------+ +----------+
+                                                    | MONGODB  | | REDIS | |   RAG    |
+                                                    |  v7.0    | | v7.2  | |  ENGINE  |
+                                                    +----------+ +-------+ +----------+
+    </div>
+
+    <h1>3. Technology Stack Breakdown</h1>
+    <div class="tech-grid">
+        <div class="tech-card">
+            <div class="tech-card-title">Frontend: React 18 & Vite</div>
+            <div class="tech-card-desc">
+                Built with React 18, Vite, React Router v6, Axios, Lucide React, Context API, and Tailwind CSS. Features dark-mode glassmorphic design and interactive line-highlighting source code modal.
+            </div>
+        </div>
+        <div class="tech-card">
+            <div class="tech-card-title">Backend: Node.js & Express</div>
+            <div class="tech-card-desc">
+                Modular Express.js REST API architecture with JWT authentication, bcrypt password hashing, Helmet headers, express-rate-limit, and centralized error handling middleware.
+            </div>
+        </div>
+        <div class="tech-card">
+            <div class="tech-card-title">Database: MongoDB & Mongoose</div>
+            <div class="tech-card-desc">
+                MongoDB v7.0 database storing User accounts, Repository statistics, AST Code Chunks with vector arrays, and Chat Sessions. Indexed on <code>(repoId, filePath)</code>.
+            </div>
+        </div>
+        <div class="tech-card">
+            <div class="tech-card-title">Caching: Redis v7.2</div>
+            <div class="tech-card-desc">
+                In-memory Redis cache storing query responses with 1-hour TTL. Features automatic cache invalidation upon repository re-indexing or deletion.
+            </div>
+        </div>
+        <div class="tech-card">
+            <div class="tech-card-title">Reverse Proxy: Nginx v1.25</div>
+            <div class="tech-card-desc">
+                Configured as reverse proxy and API Gateway listening on port 80. Routes <code>/api</code> requests to backend container and <code>/</code> to frontend static build.
+            </div>
+        </div>
+        <div class="tech-card">
+            <div class="tech-card-title">Containerization: Docker Compose</div>
+            <div class="tech-card-desc">
+                Multi-container orchestration managing 5 services (<code>mongodb</code>, <code>redis</code>, <code>backend</code>, 祖frontend`, <code>nginx</code>) with health checks.
+            </div>
+        </div>
+    </div>
+
+    <h1>4. Complete Working Mechanism & RAG Pipeline</h1>
+    <p>
+        The Retrieval-Augmented Generation (RAG) workflow follows 5 systematic steps from repository scanning to grounded response generation:
+    </p>
+
+    <h3>Step 1: Semantic AST & Block Parsing</h3>
+    <p>
+        When a repository is indexed, <code>chunkerService.js</code> scans source files (`.js`, `.ts`, `.py`, `.java`, `.cpp`, `.json`, `.md`). It identifies function declarations, class definitions, and block structures, recording metadata including <code>filePath</code>, <code>fileName</code>, <code>startLine</code>, <code>endLine</code>, <code>chunkType</code>, and <code>symbolName</code>.
+    </p>
+
+    <h3>Step 2: Dense Vector Embedding</h3>
+    <p>
+        Each code chunk is passed to <code>embeddingService.js</code>, which extracts 64-dimensional feature-hashed term-frequency vectors (or uses Google Gemini `text-embedding-004` when an API key is configured). The normalized vector array is saved in the MongoDB <code>CodeChunk</code> document.
+    </p>
+
+    <h3>Step 3: Vector Similarity & Hybrid Retrieval</h3>
+    <p>
+        When a developer submits a query, <code>ragService.js</code> computes the query embedding vector and measures cosine distance against all indexed chunks for that repository:
+    </p>
+    <div class="code-block">Cosine Similarity = (Vector_A · Vector_B) / (||Vector_A|| * ||Vector_B||)</div>
+    <p>
+        The algorithm applies a 30% keyword match boost for matching file paths and symbol names to ensure precise ranking.
+    </p>
+
+    <h3>Step 4: Grounded Answer Generation & Citation</h3>
+    <p>
+        The top-K matching chunks are assembled into a grounded prompt context. The RAG engine generates a markdown response containing explicit file paths, line ranges, similarity match percentages, and snippet previews.
+    </p>
+
+    <h3>Step 5: Redis In-Memory Response Caching</h3>
+    <p>
+        The backend checks Redis for key <code>cache:rag:&lt;repoId&gt;:&lt;mode&gt;:&lt;queryHash&gt;</code>. On a <strong>Cache HIT</strong>, the cached response is returned in <strong>&lt;5ms</strong> with a <code>⚡ Redis Cache HIT</code> indicator in the chat UI.
+    </p>
+
+    <h1>5. Database Schemas (MongoDB)</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Collection</th>
+                <th>Key Fields & Data Types</th>
+                <th>Indexes & Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>User</strong></td>
+                <td><code>name</code> (String), <code>email</code> (String), <code>password</code> (Hash), <code>role</code> (Enum)</td>
+                <td>Unique index on <code>email</code>. Manages user authentication and permissions.</td>
+            </tr>
+            <tr>
+                <td><strong>Repository</strong></td>
+                <td><code>name</code> (String), <code>owner</code> (ObjectId), <code>status</code> (Enum), <code>stats</code> (Object)</td>
+                <td>Compound index on <code>(owner, name)</code>. Tracks repo indexing state & metrics.</td>
+            </tr>
+            <tr>
+                <td><strong>CodeChunk</strong></td>
+                <td><code>repoId</code> (ObjectId), <code>filePath</code> (String), <code>startLine</code>, <code>endLine</code>, <code>vector</code> ([Number])</td>
+                <td>Index on <code>(repoId, filePath)</code>. Stores AST code chunks and vector embeddings.</td>
+            </tr>
+            <tr>
+                <td><strong>ChatSession</strong></td>
+                <td><code>repoId</code> (ObjectId), <code>userId</code> (ObjectId), <code>mode</code> (Enum), <code>title</code> (String)</td>
+                <td>Index on <code>userId</code> and <code>repoId</code>. Tracks user conversation threads.</td>
+            </tr>
+            <tr>
+                <td><strong>ChatMessage</strong></td>
+                <td><code>sessionId</code> (ObjectId), <code>sender</code> (Enum), <code>content</code> (String), <code>citations</code> ([Object])</td>
+                <td>Index on <code>sessionId</code>. Stores user queries, answers, citations, and response times.</td>
+            </tr>
+        </tbody>
+    </tbody>
+    </table>
+
+    <h1>6. Demonstration & Viva Verification Flow</h1>
+    <ol>
+        <li><strong>Application Launch:</strong> Execute <code>docker compose up --build</code> and navigate to <code>http://localhost</code>.</li>
+        <li><strong>Authentication:</strong> Log in with seed user credentials: <code>prahas@nie.ac.in</code> / <code>password123</code>.</li>
+        <li><strong>Repository Overview:</strong> View the dashboard showing total indexed repositories, semantic chunks, lines of code, and system health status.</li>
+        <li><strong>Re-indexing:</strong> Trigger re-indexing on the <code>ECommerce-Microservices-Core</code> repository to observe semantic chunking.</li>
+        <li><strong>RAG Chat Execution:</strong> Submit query <em>"Explain how authentication middleware works in this repo"</em> in <strong>Explanation Mode</strong>.</li>
+        <li><strong>Source Citation Inspection:</strong> Inspect citation card showing <code>src/middleware/auth.js</code> (Lines 1-24). Click <strong>View Source</strong> to launch the code viewer modal highlighting lines in blue.</li>
+        <li><strong>Bug Localization & Refactoring:</strong> Query <em>"Find potential unhandled null pointer bugs"</em> to view bug localization analysis.</li>
+        <li><strong>Redis Cache Verification:</strong> Submit the exact query again to verify <strong>⚡ Redis Cache HIT</strong> response in &lt;5ms.</li>
+        <li><strong>Diagnostics Page:</strong> Navigate to <code>/status</code> to demonstrate active MongoDB, Redis, and RAG vector engine status.</li>
+    </ol>
+
+    <div style="margin-top: 40px; text-align: center; font-size: 11px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+        Major Project Report — Department of Computer Science & Engineering, The National Institute of Engineering, Mysore (2026)
+    </div>
+
+</body>
+</html>
+"""
+
+html_file = r"C:\Users\raopr\.gemini\antigravity\scratch\ai-developer-assistant\AI_Developer_Assistant_Report.html"
+pdf_file = r"C:\Users\raopr\.gemini\antigravity\scratch\ai-developer-assistant\AI_Developer_Assistant_Major_Project_Report.pdf"
+
+with open(html_file, 'w', encoding='utf-8') as f:
+    f.write(html_content)
+
+print(f"HTML generated at {html_file}")
+
+# Convert HTML to PDF using MS Edge headless
+edge_path = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+if not os.path.exists(edge_path):
+    edge_path = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+
+cmd = [
+    edge_path,
+    "--headless",
+    "--disable-gpu",
+    "--no-pdf-header-footer",
+    f"--print-to-pdf={pdf_file}",
+    html_file
+]
+
+result = subprocess.run(cmd, capture_output=True, text=True)
+if result.returncode == 0:
+    print(f"PDF successfully created at {pdf_file}")
+else:
+    print(f"Error creating PDF: {result.stderr}")
