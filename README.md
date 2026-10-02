@@ -283,6 +283,6 @@ Follow this sequence during project evaluation:
 
 * **Student 1**: PRAHAS P B RAO (USN: `4NI23CS144`)
 * **Student 2**: P AKHIL DATTA (USN: `4NI23CS132`)
-* **Project Guide**: Mrs. Shilpashree S, Assistant Professor
+* **Project Guide**: Mrs. Kavya M, Assistant Professor
 * **Institution**: The National Institute of Engineering, Mysore *(An Autonomous Institution)*
 * **Department**: Department of Computer Science & Engineering
